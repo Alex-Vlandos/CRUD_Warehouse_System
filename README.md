@@ -1,55 +1,52 @@
 # 📦 Warehouse CRUD API
 
-Ένα RESTful API για διαχείριση αποθήκης, φτιαγμένο με **FastAPI**. Υποστηρίζει πλήρεις λειτουργίες **CRUD** (Create, Read, Update, Delete) για **Products** και **Orders**, με χρήση Docker και Postman.
+A RESTful API built with **FastAPI** for managing a warehouse. It supports full **CRUD** operations on **Products** and **Orders**, product search with filters, order placement with stock validation, and product statistics — all backed by a **PostgreSQL** database via **psycopg2**.
 
 ---
 
-## 🚀 Features
+## ✨ Features
 
-- ✅ Πλήρες CRUD για **Products** (δημιουργία, ανάκτηση, ενημέρωση, διαγραφή)
-- ✅ Πλήρες CRUD για **Orders** (δημιουργία, ανάκτηση, ενημέρωση, διαγραφή)
-- ✅ Data validation με **Pydantic**
-- ✅ Async endpoints με **FastAPI**
-- ✅ Βάση δεδομένων **PostgreSQL**
-- ✅ Docker
-- ✅ Συλλογή **Postman** για δοκιμή όλων των endpoints
-- ✅ Δομημένη αρχιτεκτονική (controllers / repository / domain / services)
+- ✅ Full CRUD for **Products** (create, read, update, delete)
+- ✅ Full CRUD for **Orders** (place, update, delete)
+- ✅ **Product search** with multiple optional filters (name, price range, quantity range)
+- ✅ **Stock validation** when placing or updating orders
+- ✅ **Product statistics** (totals, averages, sorted lists)
+- ✅ Automatic **Swagger UI** and **ReDoc** documentation
+- ✅ Layered architecture: `controller` → `services` → `repository` → `domain`
+- ✅ Data validation with **Pydantic**
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Τεχνολογία | Χρήση |
-|------------|-------|
-| **Python 3.11+** | Γλώσσα |
+| Technology | Purpose |
+|------------|---------|
+| **Python 3.11+** | Language |
 | **FastAPI** | Web framework |
-| **Pydantic** | Data validation |
-| **PostgreSQL** | Βάση δεδομένων |
-| **Docker** | Containerization |
+| **Pydantic** | Data validation / schemas |
+| **psycopg2** | PostgreSQL driver |
+| **PostgreSQL** | Database |
 | **Uvicorn** | ASGI server |
-| **Postman** | API testing |
 
 ---
 
-## 📁 Δομή Project
+## 📁 Project Structure
 
 ```
 APIproject/
 ├── controller/
-│   ├── main_controller.py
-│   ├── product_controller.py
-│   └── orders_controller.py
-├── domain/
-│   ├── search_products.py
-│   ├── product.py
-│   └── order.py
+│   ├── main_controller.py        # FastAPI app + router registration
+│   ├── product_controller.py     # /products endpoints
+│   └── orders_controller.py      # /orders endpoints
 ├── services/
-│   ├── product_services.py
-│   └── order_services.py
+│   ├── product_services.py       # Business logic for products
+│   └── order_services.py         # Business logic for orders
 ├── repository/
-│   └── database.py
-├── .venv
-├── .gitignore
+│   └── database.py               # All SQL queries (psycopg2)
+├── domain/
+│   ├── product.py                # Product Pydantic model
+│   ├── order.py                  # Order + OrderItem Pydantic models
+│   └── search_products.py        # SearchProducts Pydantic model
 ├── APIuvicorn.txt
 ├── database_dbeaver.txt
 └── README.md
@@ -57,82 +54,88 @@ APIproject/
 
 ---
 
-## ⚙️ Εγκατάσταση & Εκτέλεση
+## 🗄️ Database Schema
 
-### 🔹 Τοπική εκτέλεση (χωρίς Docker)
+The API expects a PostgreSQL database with the following tables:
 
-**1. Clone το repository:**
+**`products`**
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `product_id` | SERIAL / INT | Primary key |
+| `product_name` | VARCHAR | |
+| `product_description` | VARCHAR | |
+| `product_price` | NUMERIC | |
+| `product_availability` | INT | Stock quantity |
+
+**`orders`**
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `order_id` | SERIAL / INT | Primary key |
+| `customer_name` | VARCHAR | |
+
+**`order_items`**
+
+| Column | Type | Notes |
+|--------|------|-------|
+| `order_item_id` | SERIAL / INT | Primary key |
+| `order_id` | INT | FK → `orders.order_id` |
+| `product_id` | INT | FK → `products.product_id` |
+| `quantity` | INT | |
+
+> ⚠️ The database connection is currently configured in `repository/database.py` inside `connect_db()`. Default values: `dbname=students`, `user=postgres`, `password=pass123`, `host=localhost`, `port=5432`. Change them to match your environment.
+
+---
+
+## ⚙️ Installation
+
+### 1. Clone the repository
 
 ```bash
-git clone https://github.com/[το-username-σας]/[όνομα-repo].git
-cd [όνομα-repo]
+git clone https://github.com/[your-username]/[repo-name].git
+cd [repo-name]
 ```
 
-**2. Δημιουργία virtual environment:**
+### 2. Create and activate a virtual environment
 
+**Windows (PowerShell):**
+```powershell
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+```
+
+**macOS / Linux:**
 ```bash
 python -m venv .venv
+source .venv/bin/activate
 ```
 
-Ενεργοποίηση:
-
-- **Windows (PowerShell):**
-  ```powershell
-  .venv\Scripts\Activate.ps1
-  ```
-- **macOS / Linux:**
-  ```bash
-  source .venv/bin/activate
-  ```
-
-**3. Εγκατάσταση dependencies:**
+### 3. Install dependencies
 
 ```bash
-pip install -r requirements.txt
+pip install fastapi uvicorn psycopg2-binary pydantic
 ```
 
-**4. Ρύθμιση μεταβλητών περιβάλλοντος:**
+### 4. Set up the database
 
-Αντιγράψτε το `.env.example` σε `.env`:
+Create the PostgreSQL database and the three tables (`products`, `orders`, `order_items`) as shown in the schema section above.
 
-```env
-DATABASE_URL=postgresql://user:password@localhost:5432/warehouse
-```
+### 5. Run the server
 
-**5. Εκκίνηση του server:**
+From the **inner** `APIproject` folder (the one that contains the `controller/` package):
 
 ```bash
 uvicorn controller.main_controller:app --reload
 ```
 
-Το API είναι διαθέσιμο στο: **http://127.0.0.1:8000**
-
----
-
-### 🐳 Εκτέλεση με Docker
-
-```bash
-docker-compose up --build
-```
-
-Ή μεμονωμένα:
-
-```bash
-docker build -t warehouse-api .
-docker run -p 8000:8000 --env-file .env warehouse-api
-```
-
-Για τερματισμό:
-
-```bash
-docker-compose down
-```
+The API will be available at: **http://127.0.0.1:8000**
 
 ---
 
 ## 📚 API Documentation
 
-Μετά την εκκίνηση του server:
+Once the server is running:
 
 - **Swagger UI:** http://127.0.0.1:8000/docs
 - **ReDoc:** http://127.0.0.1:8000/redoc
@@ -141,152 +144,269 @@ docker-compose down
 
 ## 🔗 Endpoints
 
-### 🛒 Products
+### 🛒 Products — `/products`
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| `GET` | `/products` | Λίστα όλων των προϊόντων |
-| `GET` | `/products/{id}` | Ανάκτηση προϊόντος με ID |
-| `POST` | `/products` | Δημιουργία νέου προϊόντος |
-| `PUT` | `/products/{id}` | Ενημέρωση προϊόντος |
-| `DELETE` | `/products/{id}` | Διαγραφή προϊόντος |
+| `POST` | `/create-products` | Create one or more products |
+| `GET` | `/read-products` | List all products |
+| `PATCH` | `/update-product/{product_id}` | Update a product's fields |
+| `DELETE` | `/delete-product/{product_id}` | Delete a product |
+| `POST` | `/search-products` | Search products with filters |
 
-**POST /products — Request body:**
+**POST `/create-products` — Request body (list of products):**
 
 ```json
-{
-  "name": "Laptop",
-  "description": "Dell XPS 15",
-  "price": 1499.99,
-  "quantity": 10
-}
+[
+  {
+    "name": "Laptop",
+    "desc": "Dell XPS 15",
+    "price": 1499.99,
+    "quantity": 10
+  },
+  {
+    "name": "Mouse",
+    "desc": "Logitech MX",
+    "price": 99.99,
+    "quantity": 50
+  }
+]
 ```
 
 **Response:**
 
 ```json
 {
-  "id": 1,
-  "name": "Laptop",
-  "description": "Dell XPS 15",
-  "price": 1499.99,
-  "quantity": 10,
-  "created_at": "2026-01-15T10:30:00"
+  "message": "2 products created!",
+  "products": [
+    { "name": "Laptop", "desc": "Dell XPS 15", "price": 1499.99, "quantity": 10 },
+    { "name": "Mouse", "desc": "Logitech MX", "price": 99.99, "quantity": 50 }
+  ]
 }
 ```
 
-### 📋 Orders
+---
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/orders` | Λίστα όλων των παραγγελιών |
-| `GET` | `/orders/{id}` | Ανάκτηση παραγγελίας με ID |
-| `POST` | `/orders` | Δημιουργία νέας παραγγελίας |
-| `PUT` | `/orders/{id}` | Ενημέρωση παραγγελίας |
-| `DELETE` | `/orders/{id}` | Διαγραφή παραγγελίας |
-
-**POST /orders — Request body:**
+**GET `/read-products` — Response:**
 
 ```json
 {
-  "product_id": 1,
-  "quantity": 2,
-  "customer_name": "Alex Papadopoulos"
+  "Available products list": [
+    {
+      "product id": 1,
+      "product name": "Laptop",
+      "product description": "Dell XPS 15",
+      "product price": 1499.99,
+      "product quantity": 10
+    }
+  ]
 }
 ```
+
+---
+
+**PATCH `/update-product/{product_id}` — Request body:**
+
+```json
+{
+  "name": "Laptop Pro",
+  "price": 1699.99
+}
+```
+
+Only the fields you send will be updated. Fields left as `null` are ignored.
 
 **Response:**
 
 ```json
 {
-  "id": 1,
-  "product_id": 1,
-  "quantity": 2,
+  "message": {
+    "Product with id : 1 changed, new name : Laptop Pro,new desc : None,new price : 1699.99,new quantity": null
+  }
+}
+```
+
+---
+
+**DELETE `/delete-product/{product_id}` — Response:**
+
+```json
+{
+  "message": "Product with id : 1 has been deleted successfully!"
+}
+```
+
+---
+
+**POST `/search-products` — Request body:**
+
+```json
+{
+  "name": "Lap",
+  "min_price": 100,
+  "max_price": 2000,
+  "min_quantity": 1,
+  "max_quantity": 100
+}
+```
+
+All fields are optional. Only the ones provided are used as filters.
+
+**Response:** same structure as `/read-products`.
+
+---
+
+### 📋 Orders — `/orders`
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/place-order` | Place a new order |
+| `POST` | `/update-order/{order_id}` | Update an existing order |
+| `DELETE` | `/delete-order/{order_id}` | Delete an order |
+| `GET` | `/products-statistics` | Get product statistics |
+
+**POST `/place-order` — Request body:**
+
+```json
+{
   "customer_name": "Alex Papadopoulos",
-  "status": "pending",
-  "created_at": "2026-01-15T10:35:00"
+  "products_details": [
+    { "product_id": 1, "quantity": 2 },
+    { "product_id": 2, "quantity": 1 }
+  ]
+}
+```
+
+**Response (success):**
+
+```json
+{
+  "products ": ["product with id : 1", "quantity ordered : 2", "product with id : 2", "quantity ordered : 1"],
+  "Order details, order id ": 5
+}
+```
+
+**Response (validation error):**
+
+```json
+{
+  "Error ": "Order could not be placed",
+  "Reasons ": "['You chose product with id : 1 but you chose quantity = 100,whereas product availability is 10!']"
+}
+```
+
+**Validation rules applied by the service:**
+- Customer name is required.
+- Product list must not be empty.
+- Each item must have a `product_id` and `quantity`.
+- The same product cannot appear twice in one order.
+- Quantity must be > 0 and ≤ product availability.
+
+---
+
+**POST `/update-order/{order_id}` — Request body:**
+
+```json
+{
+  "customer_name": "Alex P.",
+  "products_details": [
+    { "product_id": 1, "quantity": 3 }
+  ]
+}
+```
+
+- If the `product_id` already exists in the order → the line is updated.
+- If it doesn't exist → a new item is inserted via `place_order`.
+
+---
+
+**DELETE `/delete-order/{order_id}` — Response:**
+
+```json
+{ "message": "Order with id 5 deleted successfully!" }
+```
+
+Or, if the order does not exist:
+
+```json
+{ "error": "There is no such order with id 5 anymore!" }
+```
+
+---
+
+**GET `/products-statistics` — Response:**
+
+```json
+{
+  "total_amount_of_different_products": 3,
+  "total_stock": 60,
+  "average_total_price": 899.99,
+  "products_descending_price": [ ... ],
+  "products_ascending_price": [ ... ]
 }
 ```
 
 ---
 
-## 🧪 Δοκιμή με Postman
+## 🧪 Testing with Postman
 
-Στο repository υπάρχει το `postman_collection.json`.
-
-1. Ανοίξτε το **Postman**
-2. **Import** → επιλέξτε το `postman_collection.json`
-3. Ρυθμίστε τη μεταβλητή `base_url` σε `http://localhost:8000`
-4. Εκτελέστε τα requests
-
----
-
-## 🐳 Docker Compose
-
-```yaml
-version: "3.9"
-
-services:
-  api:
-    build: .
-    ports:
-      - "8000:8000"
-    env_file:
-      - .env
-    depends_on:
-      - db
-
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: warehouse
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-
-volumes:
-  postgres_data:
-```
+1. Open Postman.
+2. Create a new collection called **Warehouse API**.
+3. Set a collection variable `base_url = http://localhost:8000`.
+4. Add requests using the endpoints above (e.g. `{{base_url}}/create-products`).
+5. Make sure the PostgreSQL database and tables exist before sending requests.
 
 ---
 
-## 📌 Παράδειγμα με curl
+## 📌 Example with curl
 
 ```bash
-# Δημιουργία προϊόντος
-curl -X POST http://localhost:8000/products \
+# Create products
+curl -X POST http://localhost:8000/create-products \
   -H "Content-Type: application/json" \
-  -d '{"name": "Laptop", "price": 1499.99, "quantity": 10}'
+  -d '[{"name":"Laptop","desc":"Dell XPS 15","price":1499.99,"quantity":10}]'
 
-# Λίστα προϊόντων
-curl http://localhost:8000/products
+# Read products
+curl http://localhost:8000/read-products
 
-# Δημιουργία παραγγελίας
-curl -X POST http://localhost:8000/orders \
+# Search products
+curl -X POST http://localhost:8000/search-products \
   -H "Content-Type: application/json" \
-  -d '{"product_id": 1, "quantity": 2, "customer_name": "Alex"}'
+  -d '{"min_price": 100, "max_price": 2000}'
+
+# Place an order
+curl -X POST http://localhost:8000/place-order \
+  -H "Content-Type: application/json" \
+  -d '{"customer_name":"Alex","products_details":[{"product_id":1,"quantity":2}]}'
+
+# Delete an order
+curl -X DELETE http://localhost:8000/delete-order/5
 ```
 
 ---
 
-## 🤝 Συνεισφορά
+## ⚠️ Notes
 
-Pull requests είναι ευπρόσδεκτα. Για μεγάλες αλλαγές, ανοίξτε πρώτα ένα issue για να συζητήσουμε τι θα θέλατε να αλλάξετε.
+- All database queries are done with **raw SQL** via `psycopg2` — there is no ORM.
+- The connection settings are hardcoded inside `repository/database.py`. For production, move them to environment variables.
+- The API uses `PATCH` for product updates (partial update) and `POST` for order updates (because the order update may insert new items).
 
+---
+
+## 🤝 Contributing
+
+Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+
+---
+
+## 📄 License
+
+Distributed under the **MIT** License.
 
 ---
 
 ## 👤 Author
 
-**[Το όνομά σας]**
-- GitHub: [@το-username-σας](https://github.com/Alex-Vlandos)
+**[Alexandros Vlandos]**
+- GitHub: [@your-username](https://github.com/Alex-Vlandos)
 - Email: [alexvla@windowslive.com]
-
----
-
-## ⭐ Αν σας φάνηκε χρήσιμο
-
-Αφήστε ένα ⭐ στο repository!
