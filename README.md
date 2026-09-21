@@ -93,8 +93,9 @@ The API expects a PostgreSQL database with the following tables:
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/[your-username]/[repo-name].git
-cd [repo-name]
+git clone https://github.com/Alex-Vlandos/CRUD_Warehouse_System.git
+cd CRUD_Warehouse_System
+
 ```
 
 ### 2. Create and activate a virtual environment
