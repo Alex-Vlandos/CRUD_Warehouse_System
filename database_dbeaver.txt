@@ -1,0 +1,54 @@
+create table if not exists products (
+product_id serial primary key,
+product_name text not null,
+product_description text,
+product_price decimal(20,2) not null,
+product_availability int default 0
+);
+
+create table if not exists orders (
+order_id serial primary key,
+order_date timestamp not null default now(),
+customer_name text
+);
+
+create table if not exists suppliers (
+    supplier_id SERIAL PRIMARY KEY,
+    supplier_name text NOT NULL,
+    phone text,
+    email text,
+    address text
+);
+
+create table if not exists order_items (
+order_item_id serial primary key,
+order_id int references orders(order_id) on delete cascade,
+product_id int references products(product_id) on delete cascade,
+quantity int not null
+);
+
+INSERT INTO products (product_name, product_description, product_price, product_availability) VALUES
+('Laptop', 'High performance gaming laptop', 1500.00, 10),
+('Smartphone', 'Latest model with OLED screen', 900.50, 25),
+('Headphones', 'Noise-cancelling over-ear headphones', 200.99, 50),
+('Coffee Maker', 'Automatic espresso coffee machine', 120.00, 15),
+('Backpack', 'Waterproof laptop backpack', 60.50, 30);
+
+INSERT INTO suppliers (supplier_name, phone, email, address) VALUES
+('Tech Supplies Co.', '123-456-7890', 'contact@techsupplies.com', '123 Tech Street'),
+('Gadget World', '987-654-3210', 'sales@gadgetworld.com', '456 Gadget Avenue'),
+('Audio Experts', '555-123-4567', 'support@audioexperts.com', '789 Music Blvd');
+
+INSERT INTO orders (customer_name) VALUES
+('Alex'),
+('Maria'),
+('John');
+
+INSERT INTO order_items (order_id, product_id, quantity) VALUES
+(1, 1, 1), 
+(1, 3, 2),  
+(2, 2, 1),  
+(3, 5, 3);  
+
+
+
