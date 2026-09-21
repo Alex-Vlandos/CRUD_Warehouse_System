@@ -403,5 +403,5 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 ## 👤 Author
 
 **[Alexandros Vlandos]**
-- GitHub: [@your-username](https://github.com/Alex-Vlandos)
-- Email: [alexvla@windowslive.com]
+- GitHub: [@Alex-Vlandos](https://github.com/Alex-Vlandos)
+- Email: alexvla@windowslive.com
